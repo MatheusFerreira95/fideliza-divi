@@ -1,113 +1,220 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agenda de Serviços</title>
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    input, button { margin: 5px 0; padding: 8px; width: 100%; }
-    h2 { margin-top: 30px; }
-    .card { background: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    a { color: green; text-decoration: none; }
-  </style>
-</head>
-<body>
-  <h1>Agendamento de Serviços</h1>
-
-  <input placeholder="Nome" id="nome" />
-  <input placeholder="Veículo" id="veiculo" />
-  <input placeholder="Telefone" id="telefone" />
-  <input placeholder="Serviço" id="servico" />
-  <input type="datetime-local" id="dataHora" />
-  <button onclick="salvar()">Salvar</button>
-
-  <h2>Relatório</h2>
-  <div id="relatorio"></div>
-
-  <h2>Consulta: Clientes há X dias sem atendimento</h2>
-  <input type="number" id="diasSem" placeholder="Dias" />
-  <button onclick="consultarFaltantes()">Consultar</button>
-  <div id="faltantes"></div>
-
-  <script>
-    function salvar() {
-      const dados = {
-        nome: document.getElementById("nome").value,
-        veiculo: document.getElementById("veiculo").value,
-        telefone: document.getElementById("telefone").value,
-        servico: document.getElementById("servico").value,
-        dataHora: document.getElementById("dataHora").value
-      };
-      if (!dados.nome || !dados.dataHora) {
-        alert("Nome e data são obrigatórios!");
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fideliza Divi App</title>
+    <link rel="icon" href="logo.png" type="image/x-icon" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      const lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
-      lista.push(dados);
-      localStorage.setItem("agendamentos", JSON.stringify(lista));
-      limparCampos();
-      mostrarRelatorio();
-    }
 
-    function limparCampos() {
-      document.getElementById("nome").value = "";
-      document.getElementById("veiculo").value = "";
-      document.getElementById("telefone").value = "";
-      document.getElementById("servico").value = "";
-      document.getElementById("dataHora").value = "";
-    }
-
-    function mostrarRelatorio() {
-      const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
-      dados.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
-      const agrupado = {};
-      for (const d of dados) {
-        const dia = d.dataHora.split("T")[0];
-        if (!agrupado[dia]) agrupado[dia] = [];
-        agrupado[dia].push(d);
+      .app-header {
+        background-color: #43a047; /* verde tipo Android */
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        height: 60px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
       }
-      const relatorioDiv = document.getElementById("relatorio");
-      relatorioDiv.innerHTML = "";
-      Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(dia => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<strong>${dia}</strong><ul>` +
-          agrupado[dia].map(e => {
-            const telefoneLimpo = e.telefone.replace(/\D/g, '');
-            return `<li>${e.nome} - ${e.veiculo} - ${e.servico} 
-              (${new Date(e.dataHora).toLocaleTimeString()}) - 
-              <a href="https://wa.me/55${telefoneLimpo}" target="_blank">WhatsApp</a></li>`;
-          }).join('') + "</ul>";
-        relatorioDiv.appendChild(card);
-      });
-    }
 
-    function consultarFaltantes() {
-      const dias = parseInt(document.getElementById("diasSem").value);
-      if (!dias) return alert("Informe os dias!");
-      const limite = new Date();
-      limite.setDate(limite.getDate() - dias);
-      const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+      .logo-container {
+        display: flex;
+        align-items: center;
+      }
 
-      const ultimoServicoPorCliente = {};
-      dados.forEach(d => {
-        if (!ultimoServicoPorCliente[d.nome] || new Date(d.dataHora) > new Date(ultimoServicoPorCliente[d.nome])) {
-          ultimoServicoPorCliente[d.nome] = d.dataHora;
+      .logo {
+        height: 36px;
+        width: 36px;
+        margin-right: 10px;
+        border-radius: 6px;
+      }
+
+      .app-title {
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      body {
+        padding: 20px;
+        background: #f4f4f4;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      input,
+      button {
+        margin: 5px 0;
+        padding: 8px;
+        width: 100%;
+      }
+      h2 {
+        margin-top: 30px;
+      }
+      .card {
+        background: white;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+      a {
+        color: green;
+        text-decoration: none;
+      }
+      li {
+        list-style-type: none;
+      }
+      x-delete {
+        color: darkred;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <header class="app-header">
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo Fideliza Divi App" class="logo" />
+      <span class="app-title">Fideliza Divi App</span>
+    </div>
+  </header>
+
+  <body style="padding-top: 60px;">
+    <h2>Agendamento de Serviços</h2>
+
+    <input placeholder="Nome" id="nome" />
+    <input placeholder="Veículo" id="veiculo" />
+    <input placeholder="Telefone" id="telefone" />
+    <input placeholder="Serviço" id="servico" />
+    <input type="datetime-local" id="dataHora" />
+    <button onclick="salvar()">Salvar</button>
+
+    <h2>Consulta: Clientes há X dias sem atendimento</h2>
+    <input type="number" id="diasSem" placeholder="Dias" />
+    <button onclick="consultarFaltantes()">Consultar</button>
+    <div id="faltantes"></div>
+
+    <h2>Relatório Histórico</h2>
+    <div id="relatorio"></div>
+
+    <script>
+      function salvar() {
+        const dados = {
+          nome: document.getElementById("nome").value,
+          veiculo: document.getElementById("veiculo").value,
+          telefone: document.getElementById("telefone").value,
+          servico: document.getElementById("servico").value,
+          dataHora: document.getElementById("dataHora").value
+        };
+        if (!dados.nome || !dados.dataHora) {
+          alert("Nome e data são obrigatórios!");
+          return;
         }
-      });
+        const lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+        lista.push(dados);
+        localStorage.setItem("agendamentos", JSON.stringify(lista));
+        limparCampos();
+        mostrarRelatorio();
+      }
 
-      const resultado = Object.entries(ultimoServicoPorCliente)
-        .filter(([_, ultima]) => new Date(ultima).toDateString() === limite.toDateString());
+      function limparCampos() {
+        document.getElementById("nome").value = "";
+        document.getElementById("veiculo").value = "";
+        document.getElementById("telefone").value = "";
+        document.getElementById("servico").value = "";
+        document.getElementById("dataHora").value = "";
+      }
 
-      const faltantesDiv = document.getElementById("faltantes");
-      faltantesDiv.innerHTML = `<p><strong>Total: ${resultado.length}</strong></p><ul>` +
-        resultado.map(([nome, data]) =>
-          `<li>${nome} - Último serviço: ${new Date(data).toLocaleDateString()}</li>`
-        ).join('') + "</ul>";
-    }
+      function mostrarRelatorio() {
+        const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+        dados.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+        const agrupado = {};
+        for (const d of dados) {
+          const dia = d.dataHora.split("T")[0];
+          if (!agrupado[dia]) agrupado[dia] = [];
+          agrupado[dia].push(d);
+        }
+        const relatorioDiv = document.getElementById("relatorio");
+        relatorioDiv.innerHTML = "";
+        Object.keys(agrupado)
+          .sort((a, b) => b.localeCompare(a))
+          .forEach(dia => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML =
+              `<strong>${dia}</strong><ul list-style: none>` +
+              agrupado[dia]
+                .map((e, index) => {
+                  const telefoneLimpo = e.telefone.replace(/\D/g, "");
+                  return `<li>${e.nome} - ${e.veiculo} - ${e.servico}
+                (${new Date(e.dataHora).toLocaleTimeString()}) -
+                <a href="https://wa.me/55${telefoneLimpo}" target="_blank"> ${
+                    e.telefone
+                  }</a> <x-delete onclick="deletar(${index})">X</x-delete></li>`;
+                })
+                .join("") +
+              "</ul>";
+            relatorioDiv.appendChild(card);
+          });
+      }
 
-    mostrarRelatorio();
-  </script>
-</body>
+      function deletar(index) {
+        if (confirm("Tem certeza que deseja deletar?")) {
+          const lista = JSON.parse(
+            localStorage.getItem("agendamentos") || "[]"
+          );
+          lista.splice(index, 1);
+          localStorage.setItem("agendamentos", JSON.stringify(lista));
+
+          mostrarRelatorio();
+        }
+      }
+
+      function consultarFaltantes() {
+        const dias = parseInt(document.getElementById("diasSem").value);
+        if (!dias) return alert("Informe os dias!");
+        const limite = new Date();
+        limite.setDate(limite.getDate() - dias);
+        const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+
+        const ultimoServicoPorCliente = {};
+        dados.forEach(d => {
+          if (
+            !ultimoServicoPorCliente[d.nome] ||
+            new Date(d.dataHora) > new Date(ultimoServicoPorCliente[d.nome])
+          ) {
+            ultimoServicoPorCliente[d.nome] = d;
+          }
+        });
+
+        const resultado = Object.entries(ultimoServicoPorCliente).filter(
+          ([_, cliente]) =>
+            new Date(cliente.dataHora).toDateString() === limite.toDateString()
+        );
+
+        const faltantesDiv = document.getElementById("faltantes");
+        faltantesDiv.innerHTML =
+          `<p><strong>Total: ${resultado.length}</strong></p><ul>` +
+          resultado
+            .map(e => {
+              const telefoneLimpo = e[1].telefone.replace(/\D/g, "");
+              return `<li>${e[1].nome} - ${e[1].veiculo} - ${e[1].servico}
+                (${new Date(e[1].dataHora).toLocaleTimeString()}) -
+                <a href="https://wa.me/55${telefoneLimpo}" target="_blank"> ${
+                e[1].telefone
+              }</a></li>`;
+            })
+            .join("") +
+          "</ul>";
+      }
+
+      mostrarRelatorio();
+    </script>
+  </body>
 </html>
