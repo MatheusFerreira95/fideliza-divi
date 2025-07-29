@@ -5,103 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fideliza Divi App</title>
     <link rel="icon" href="logo.png" type="image/x-icon" />
+
+    <!-- Material Design Lite -->
+    <link
+      rel="stylesheet"
+      href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css"
+    />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
     <style>
-      * {
+      body {
+        font-family: 'Roboto', sans-serif;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
+        background: #f5f5f5;
       }
-
-      .app-header {
-        background-color: #43a047; /* verde tipo Android */
-        color: white;
-        display: flex;
-        align-items: center;
-        padding: 10px 16px;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        height: 60px;
-        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
+      .page-content {
+        padding: 20px;
       }
-
-      .logo-container {
-        display: flex;
-        align-items: center;
-      }
-
       .logo {
         height: 36px;
-        width: 36px;
         margin-right: 10px;
         border-radius: 6px;
       }
-
-      .app-title {
-        font-size: 20px;
-        font-weight: bold;
-      }
-
-      body {
-        padding: 20px;
-        background: #f4f4f4;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      input,
-      button {
-        margin: 5px 0;
-        padding: 8px;
-        width: 100%;
-      }
-      h2 {
-        margin-top: 30px;
-      }
       .card {
-        background: white;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
+        margin-bottom: 20px;
       }
-      a {
-        color: green;
-        text-decoration: none;
-      }
-      li {
-        list-style-type: none;
-      }
-      x-delete {
-        color: darkred;
-        font-weight: bold;
-        cursor: pointer;
+      .flex-row {
+        display: flex;
+        gap: 10px;
       }
     </style>
   </head>
+  <body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <img src="logo.png" class="logo" alt="Logo" />
+          <span class="mdl-layout-title">Fideliza Divi</span>
+        </div>
+      </header>
 
-  <header class="app-header">
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo Fideliza Divi App" class="logo" />
-      <span class="app-title">Fideliza Divi App</span>
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          <!-- Agendamento -->
+          <h4>Agendamento de Serviços</h4>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" id="nome" />
+            <label class="mdl-textfield__label" for="nome">Nome</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" id="veiculo" />
+            <label class="mdl-textfield__label" for="veiculo">Veículo</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="tel" id="telefone" />
+            <label class="mdl-textfield__label" for="telefone">Telefone</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" id="servico" />
+            <label class="mdl-textfield__label" for="servico">Serviço</label>
+          </div>
+          <input type="datetime-local" id="dataHora" class="mdl-textfield__input" />
+          <br /><br />
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="salvar()">
+            Salvar
+          </button>
+
+          <h4>Consulta: Clientes há X dias sem atendimento</h4>
+          <div class="flex-row">
+            <input
+              class="mdl-textfield__input"
+              type="number"
+              id="diasSem"
+              placeholder="Dias"
+            />
+            <button
+              class="mdl-button mdl-js-button mdl-button--raised"
+              onclick="consultarFaltantes()"
+            >
+              Consultar
+            </button>
+          </div>
+          <div id="faltantes"></div>
+
+          <h4>Relatório Histórico</h4>
+          <div id="relatorio"></div>
+        </div>
+      </main>
     </div>
-  </header>
-
-  <body style="padding-top: 60px;">
-    <h2>Agendamento de Serviços</h2>
-
-    <input placeholder="Nome" id="nome" />
-    <input placeholder="Veículo" id="veiculo" />
-    <input placeholder="Telefone" id="telefone" />
-    <input placeholder="Serviço" id="servico" />
-    <input type="datetime-local" id="dataHora" />
-    <button onclick="salvar()">Salvar</button>
-
-    <h2>Consulta: Clientes há X dias sem atendimento</h2>
-    <input type="number" id="diasSem" placeholder="Dias" />
-    <button onclick="consultarFaltantes()">Consultar</button>
-    <div id="faltantes"></div>
-
-    <h2>Relatório Histórico</h2>
-    <div id="relatorio"></div>
 
     <script>
       function salvar() {
@@ -110,7 +106,7 @@
           veiculo: document.getElementById("veiculo").value,
           telefone: document.getElementById("telefone").value,
           servico: document.getElementById("servico").value,
-          dataHora: document.getElementById("dataHora").value
+          dataHora: document.getElementById("dataHora").value,
         };
         if (!dados.nome || !dados.dataHora) {
           alert("Nome e data são obrigatórios!");
@@ -124,11 +120,9 @@
       }
 
       function limparCampos() {
-        document.getElementById("nome").value = "";
-        document.getElementById("veiculo").value = "";
-        document.getElementById("telefone").value = "";
-        document.getElementById("servico").value = "";
-        document.getElementById("dataHora").value = "";
+        ["nome", "veiculo", "telefone", "servico", "dataHora"].forEach(
+          (id) => (document.getElementById(id).value = "")
+        );
       }
 
       function mostrarRelatorio() {
@@ -144,34 +138,30 @@
         relatorioDiv.innerHTML = "";
         Object.keys(agrupado)
           .sort((a, b) => b.localeCompare(a))
-          .forEach(dia => {
+          .forEach((dia) => {
             const card = document.createElement("div");
-            card.className = "card";
+            card.className = "mdl-card mdl-shadow--2dp card";
             card.innerHTML =
-              `<strong>${dia}</strong><ul list-style: none>` +
+              `<div class="mdl-card__title"><h6>${dia}</h6></div><div class="mdl-card__supporting-text">` +
               agrupado[dia]
                 .map((e, index) => {
-                  const telefoneLimpo = e.telefone.replace(/\D/g, "");
-                  return `<li>${e.nome} - ${e.veiculo} - ${e.servico}
-                (${new Date(e.dataHora).toLocaleTimeString()}) -
-                <a href="https://wa.me/55${telefoneLimpo}" target="_blank"> ${
-                    e.telefone
-                  }</a> <x-delete onclick="deletar(${index})">X</x-delete></li>`;
+                  const tel = e.telefone.replace(/\D/g, "");
+                  return `<p>${e.nome} - ${e.veiculo} - ${e.servico} - 
+                  <a href="https://wa.me/55${tel}" target="_blank">${e.telefone}</a>
+                  <button class="mdl-button mdl-js-button mdl-button--icon" onclick="deletar(${index})">
+                    <i class="material-icons">delete</i></button></p>`;
                 })
                 .join("") +
-              "</ul>";
+              "</div>";
             relatorioDiv.appendChild(card);
           });
       }
 
       function deletar(index) {
         if (confirm("Tem certeza que deseja deletar?")) {
-          const lista = JSON.parse(
-            localStorage.getItem("agendamentos") || "[]"
-          );
+          const lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
           lista.splice(index, 1);
           localStorage.setItem("agendamentos", JSON.stringify(lista));
-
           mostrarRelatorio();
         }
       }
@@ -184,10 +174,10 @@
         const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
 
         const ultimoServicoPorCliente = {};
-        dados.forEach(d => {
+        dados.forEach((d) => {
           if (
             !ultimoServicoPorCliente[d.nome] ||
-            new Date(d.dataHora) > new Date(ultimoServicoPorCliente[d.nome])
+            new Date(d.dataHora) > new Date(ultimoServicoPorCliente[d.nome].dataHora)
           ) {
             ultimoServicoPorCliente[d.nome] = d;
           }
@@ -195,20 +185,18 @@
 
         const resultado = Object.entries(ultimoServicoPorCliente).filter(
           ([_, cliente]) =>
-            new Date(cliente.dataHora).toDateString() === limite.toDateString()
+            new Date(cliente.dataHora).toDateString() ===
+            limite.toDateString()
         );
 
         const faltantesDiv = document.getElementById("faltantes");
         faltantesDiv.innerHTML =
           `<p><strong>Total: ${resultado.length}</strong></p><ul>` +
           resultado
-            .map(e => {
-              const telefoneLimpo = e[1].telefone.replace(/\D/g, "");
-              return `<li>${e[1].nome} - ${e[1].veiculo} - ${e[1].servico}
-                (${new Date(e[1].dataHora).toLocaleTimeString()}) -
-                <a href="https://wa.me/55${telefoneLimpo}" target="_blank"> ${
-                e[1].telefone
-              }</a></li>`;
+            .map((e) => {
+              const tel = e[1].telefone.replace(/\D/g, "");
+              return `<li>${e[1].nome} - ${e[1].veiculo} - ${e[1].servico} -
+              <a href="https://wa.me/55${tel}" target="_blank">${e[1].telefone}</a></li>`;
             })
             .join("") +
           "</ul>";
