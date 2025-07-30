@@ -1,0 +1,6 @@
+{
+  "appId": "com.fideliza.divi",
+  "appName": "fideliza-divi",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

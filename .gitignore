@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Capacitor build output
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.DS_Store
+android/captures/
+android/build/
+android/.externalNativeBuild/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# VSCode settings (caso use)
+.vscode/
+
+# Capacitor sync outputs
+www/
