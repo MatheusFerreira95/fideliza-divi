@@ -109,6 +109,19 @@
           <div id="faltantes"></div>
 
           <h4>Relatório Histórico</h4>
+          <div
+            class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+          >
+            <input
+              class="mdl-textfield__input"
+              type="text"
+              id="filtrarCliente"
+              oninput="filtrar()"
+            />
+            <label class="mdl-textfield__label" for="filtrarCliente"
+              >Filtrar Cliente</label
+            >
+          </div>
           <div id="relatorio"></div>
         </div>
       </main>
@@ -140,8 +153,10 @@
         );
       }
 
-      function mostrarRelatorio() {
-        const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+      function mostrarRelatorio(filtro) {
+        const dados = filtro
+          ? filtro
+          : JSON.parse(localStorage.getItem("agendamentos") || "[]");
         dados.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
         const agrupado = {};
         for (const d of dados) {
@@ -161,15 +176,33 @@
               agrupado[dia]
                 .map((e, index) => {
                   const tel = e.telefone.replace(/\D/g, "");
-                  return `<p>${e.nome} - ${e.veiculo} - ${e.servico} - 
-                  <a href="https://wa.me/55${tel}" target="_blank">${e.telefone}</a>
-                  <button class="mdl-button mdl-js-button mdl-button--icon" onclick="deletar(${index})">
-                    <i class="material-icons">delete</i></button></p>`;
+                  return `<p>${e.nome} - ${e.veiculo} - ${e.servico} -
+                      <a href="https://wa.me/55${tel}" target="_blank">${e.telefone}</a>
+                      <button class="mdl-button mdl-js-button mdl-button--icon" onclick="deletar(${index})">
+                        <i class="material-icons">delete</i></button></p>`;
                 })
                 .join("") +
               "</div>";
             relatorioDiv.appendChild(card);
           });
+      }
+
+      function filtrar() {
+        const input = document.getElementById("filtrarCliente");
+        const filtro = input.value.toLowerCase();
+        const agendamentos = JSON.parse(
+          localStorage.getItem("agendamentos") || "[]"
+        );
+        var agendamentosFiltrado = [];
+
+        agendamentos.forEach(agendamento => {
+          const nomeCliente = agendamento.nome.toLowerCase();
+          if (nomeCliente.includes(filtro)) {
+            agendamentosFiltrado.push(agendamento);
+          }
+        });
+
+        mostrarRelatorio(agendamentosFiltrado);
       }
 
       function deletar(index) {
@@ -213,7 +246,7 @@
             .map(e => {
               const tel = e[1].telefone.replace(/\D/g, "");
               return `<li>${e[1].nome} - ${e[1].veiculo} - ${e[1].servico} -
-              <a href="https://wa.me/55${tel}" target="_blank">${e[1].telefone}</a></li>`;
+                  <a href="https://wa.me/55${tel}" target="_blank">${e[1].telefone}</a></li>`;
             })
             .join("") +
           "</ul>";
