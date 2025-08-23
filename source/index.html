@@ -41,7 +41,7 @@
       }
     </style>
   </head>
-  <body onload="inicializarAgendamentos(); mostrarRelatorio();">
+  <body onload="inicializarAgendamentos()">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
@@ -108,7 +108,16 @@
           </div>
           <div id="faltantes"></div>
 
-          <h4>Relatório Histórico</h4>
+          <h4 style="display:flex; align-items:center; gap:10px;">
+            Relatório Histórico
+            <button
+              class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+              onclick="exportarPlanilha()"
+            >
+              Exportar CSV
+            </button>
+          </h4>
+
           <div
             class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
           >
@@ -127,6 +136,8 @@
       </main>
     </div>
 
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
     <script>
       function inicializarAgendamentos() {
         let lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
@@ -143,6 +154,8 @@
         if (atualizado) {
           localStorage.setItem("agendamentos", JSON.stringify(lista));
         }
+
+        mostrarRelatorio();
       }
 
       function salvar() {
@@ -270,7 +283,88 @@
           "</ul>";
       }
 
-      mostrarRelatorio();
+      function exportarPlanilha() {
+        const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+
+        // Agrupar por mês
+        const agrupado = {};
+        dados.forEach(d => {
+          const dt = new Date(d.dataHora);
+          const mes = dt.toLocaleString("pt-BR", {
+            month: "long",
+            year: "numeric"
+          });
+          if (!agrupado[mes]) agrupado[mes] = [];
+          agrupado[mes].push(d);
+        });
+
+        // Criar planilha
+        const wb = XLSX.utils.book_new();
+
+        Object.keys(agrupado)
+          .sort()
+          .forEach(mes => {
+            // Criar tabela do mês
+            const rows = agrupado[mes].map(item => ({
+              Nome: item.nome,
+              Veiculo: item.veiculo,
+              Servico: item.servico,
+              Telefone: item.telefone,
+              DataHora: item.dataHora,
+              Valor: "" // Coluna vazia para preencher depois
+            }));
+
+            // Adicionar aba por mês
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, mes);
+          });
+
+        // Baixar planilha
+        XLSX.writeFile(wb, "agendamentos.xlsx");
+      }
+
+      // nao testado ainda. Chat gpt disse que funcionaria no android, pois o exportar planilha nao funciona:
+      function exportarCSV() {
+        const dados = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+
+        // Agrupar por mês
+        const agrupado = {};
+        dados.forEach(d => {
+          const dt = new Date(d.dataHora);
+          const mes = dt.toLocaleString("pt-BR", {
+            month: "long",
+            year: "numeric"
+          });
+          if (!agrupado[mes]) agrupado[mes] = [];
+          agrupado[mes].push(d);
+        });
+
+        // Criar CSV
+        let csv = "Mês,Nome,Veículo,Serviço,Telefone,DataHora,Valor\n"; // Valor para preencher
+        Object.keys(agrupado)
+          .sort()
+          .forEach(mes => {
+            agrupado[mes].forEach(item => {
+              const linha = [
+                mes,
+                `"${item.nome}"`,
+                `"${item.veiculo}"`,
+                `"${item.servico}"`,
+                `"${item.telefone}"`,
+                `"${item.dataHora}"`,
+                "" // coluna Valor vazia
+              ];
+              csv += linha.join(",") + "\n";
+            });
+          });
+
+        // Abrir CSV em nova aba (funciona no WebView)
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        // Para WebView Android, o "download" pode não funcionar, mas abrir em nova aba permite copiar ou usar "Compartilhar"
+        window.open(url, "_blank");
+      }
     </script>
   </body>
 </html>
