@@ -41,7 +41,7 @@
       }
     </style>
   </head>
-  <body>
+  <body onload="inicializarAgendamentos(); mostrarRelatorio();">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
@@ -128,8 +128,26 @@
     </div>
 
     <script>
+      function inicializarAgendamentos() {
+        let lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+
+        let atualizado = false;
+        lista = lista.map(item => {
+          if (!item.id) {
+            item.id = Date.now() + Math.floor(Math.random() * 1000);
+            atualizado = true;
+          }
+          return item;
+        });
+
+        if (atualizado) {
+          localStorage.setItem("agendamentos", JSON.stringify(lista));
+        }
+      }
+
       function salvar() {
         const dados = {
+          id: Date.now(),
           nome: document.getElementById("nome").value,
           veiculo: document.getElementById("veiculo").value,
           telefone: document.getElementById("telefone").value,
@@ -178,7 +196,7 @@
                   const tel = e.telefone.replace(/\D/g, "");
                   return `<p>${e.nome} - ${e.veiculo} - ${e.servico} -
                       <a href="https://wa.me/55${tel}" target="_blank">${e.telefone}</a>
-                      <button class="mdl-button mdl-js-button mdl-button--icon" onclick="deletar(${index})">
+                      <button class="mdl-button mdl-js-button mdl-button--icon" onclick="deletar(${e.id})">
                         <i class="material-icons">delete</i></button></p>`;
                 })
                 .join("") +
@@ -193,7 +211,7 @@
         const agendamentos = JSON.parse(
           localStorage.getItem("agendamentos") || "[]"
         );
-        var agendamentosFiltrado = [];
+        let agendamentosFiltrado = [];
 
         agendamentos.forEach(agendamento => {
           const nomeCliente = agendamento.nome.toLowerCase();
@@ -205,13 +223,13 @@
         mostrarRelatorio(agendamentosFiltrado);
       }
 
-      function deletar(index) {
+      function deletar(id) {
         if (confirm("Tem certeza que deseja deletar?")) {
-          const lista = JSON.parse(
-            localStorage.getItem("agendamentos") || "[]"
-          );
-          lista.splice(index, 1);
+          let lista = JSON.parse(localStorage.getItem("agendamentos") || "[]");
+
+          lista = lista.filter(item => item.id !== id);
           localStorage.setItem("agendamentos", JSON.stringify(lista));
+
           mostrarRelatorio();
         }
       }
