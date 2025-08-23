@@ -2,8 +2,16 @@
   "name": "fideliza-divi",
   "version": "1.0.0",
   "description": "Fideliza Divi App",
-  "main": "index.html",
-  "scripts": {},
+  "main": "source/index.html",
+  "scripts": {
+    "copy:linux-ource": "rm -rf www/* && cp -R source/* www/",
+    "clean:linux-android": "cd android && ./gradlew clean && cd ..",
+    "build:inux-android": "npm run copy:linux-source && npm run clean:linux-android && npx cap copy android && cd android && ./gradlew assembleDebug && cd ..",
+    "copy:source": "rmdir /s /q www && xcopy source www /e /i /y",
+    "clean:android": "cd android && gradlew.bat clean && cd ..",
+    "setJavaVersion17": "export JAVA_HOME='/c/Program Files/Java/jdk-17' && export PATH='$JAVA_HOME/bin:$PATH'",
+    "build:android": "npm run copy:source && npm run clean:android && npx cap copy android && cd android && gradlew.bat assembleDebug && cd app\\build\\outputs\\apk\\debug && explorer . && cd ../../../../../"
+  },
   "dependencies": {
     "@capacitor/android": "^7.4.2",
     "@capacitor/cli": "^7.4.2",
